@@ -134,16 +134,16 @@ final class TestMain {
     * Testing for invalid JSON-Lite schemas.
     * */
 
-    tests.add("Illegal character after given value", new Test() {
+    tests.add("Illegal character after given value (IOException)", new Test() {
       @Override
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
         // '}' after value should not be there = throw error.
-        final JSON obj = parser.parse("{ \"name\": \"sam doe\" ,}");
+        final JSON obj = parser.parse("{ \"name\": \"sam doe\" };");
       }
     });
 
-    tests.add("Illegal character after given key", new Test() {
+    tests.add("Illegal character after given key (IOException)", new Test() {
       @Override
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
@@ -151,14 +151,6 @@ final class TestMain {
         final JSON obj = parser.parse("{ \"name\": }\"sam doe\" }");
       }
     });
-
-//    tests.add("Missing Quote", new Test() {
-//      @Override
-//      public void run(JSONFactory factory) throws Exception {
-//        final JSONParser parser = factory.parser();
-//        final JSON obj = parser.parse("{ \"name\": {\"sam doe\" }");
-//      }
-//    });
 
     tests.run(new JSONFactory(){
       @Override

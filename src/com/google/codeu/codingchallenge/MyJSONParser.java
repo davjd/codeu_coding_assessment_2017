@@ -45,11 +45,31 @@ final class MyJSONParser implements JSONParser {
         passedColon = false;
         completed = true;
         i += ((MyJSON)map.getObject(key)).getLen();
-      }
-      else if(token == '}' && completed && passedColon){
-        map.setLen(++i);
-        return map;
       } // there has to be a better way to take care of exceptions :(
+      else if(token == '}' && completed && !passedColon){
+        if(in.charAt(i - 1) == ' ' || in.charAt(i - 1) == '"'
+                || (in.charAt(i - 1) == '}' && ((MyJSON)map).getObjCtr() != 0 )){
+
+          if(in.indexOf('"', i) > 0){
+            String tail = in.substring(i + 1, in.indexOf('"', i)).trim();
+            if(tail.length() != 1 || !tail.contains(",")){
+              throw new IOException("Invalid character after given object.");
+            }
+          }
+          else{
+            String tail = in.substring(i + 1).replaceAll("\\s","");
+            if(tail.length() == 1 && !tail.equals("}")){
+              throw new IOException("Invalid ending of JSON-Lite object.");
+            }
+          }
+
+          map.setLen(++i);
+          return map;
+        }
+        else{
+          throw new IOException("Illegal character after object value.");
+        }
+      }
       else if(token == ':'){
         if(passedColon){
           throw new IOException("Duplicate colon before given value.");
@@ -61,21 +81,21 @@ final class MyJSONParser implements JSONParser {
       else if(completed){
         if(passedColon){
           if(token != ',' && token != ' ' && token != '}'){
-            System.out.println(token + " is illegal.");
             throw new IOException("Invalid character after given key.");
-          }
-        }
-        else{
-          if(token == '}'){
-
           }
         }
       }
       else if(token != ' ' && (token != '{' && !completed)){
-        System.out.println(token + " is illegal.");
         throw new IOException("Invalid character after given key.");
       }
     }
     return map;
+  }
+
+  public boolean isValidTail(String s){
+    for(int i = 0, end = s.length(); i < end; ++i){
+      return true;
+    }
+    return false;
   }
 }

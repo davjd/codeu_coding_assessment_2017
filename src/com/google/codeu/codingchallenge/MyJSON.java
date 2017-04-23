@@ -24,10 +24,11 @@ final class MyJSON implements JSON {
   // the value might either be a String or a JSON object.
   private HashMap<String, Object> mem;
   private int objectLen;
-
+  private int objCtr;
   public MyJSON(){
     mem = new HashMap<String, Object>();
     objectLen = -1;
+    objCtr = 0;
   }
 
   @Override
@@ -41,6 +42,7 @@ final class MyJSON implements JSON {
   @Override
   public JSON setObject(String name, JSON value) {
     mem.put(name, value);
+    ++objCtr;
     return this;
   }
 
@@ -84,6 +86,10 @@ final class MyJSON implements JSON {
 
   public int getLen(){
     return objectLen;
+  }
+
+  public int getObjCtr(){
+    return objCtr;
   }
 
   public HashMap<String, Object> getMem(){
