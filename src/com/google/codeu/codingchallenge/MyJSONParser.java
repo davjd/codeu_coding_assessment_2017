@@ -37,10 +37,17 @@ final class MyJSONParser implements JSONParser {
         int end = in.indexOf(token, i + 1);
         if(completed){
           key = in.substring(i + 1, end);
+          if(!validEscapes(key)){
+            throw new IOException("Illegal escape character in key.");
+          }
           completed = false;
         }
         else{
-          map.setString(key, in.substring(i + 1, end));
+          String val = in.substring(i + 1, end);
+          if(!validEscapes(val)){
+            throw new IOException("Illegal escape character in value.");
+          }
+          map.setString(key, val);
           passedColon = false;
           completed = true;
         }
@@ -109,5 +116,16 @@ final class MyJSONParser implements JSONParser {
   public String clear(String in, char c, int from){
     if(in.indexOf(c, from) == -1) return null;
     else return in.substring(from,in.indexOf(c)).replaceAll("\\s+","");
+  }
+
+  public boolean validEscapes(String s){
+    for(int i = 0, end = s.length() - 1; i < end; ++i){
+      if(s.charAt(i) == '\\' && s.charAt(i + 1) != 't'
+              && s.charAt(i + 1) != 'n'){
+        return false;
+      }
+    }
+
+    return true;
   }
 }

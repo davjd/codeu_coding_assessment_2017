@@ -22,25 +22,7 @@ import java.util.HashSet;
 final class TestMain {
 
   public static void main(String[] args) {
-//
-//    String s = "{ \"name\":{\"first\":\"sam\", \"last\":\"doe\" } }";
-//    String in = "{ \"name\":\":\", \"age\" : \"17\", \"birthdate\" : { \"month\" : \"jan\", \"day\" : { \"1st\" : \"0\", \"2nd\" : \"1\"}, \"year\" : \"1999 }\"}}";
-//    String s2 = "{ \"name\": \"last\"}";
-//    String s1 = "{ \"{name}\":{\"first\":\"sam\", \"last\":\"doe\" } }";
-//    String s = "{ \"name\":{\"first\":\"sam\", \"last\":\"doe\" } }";
-//    MyJSONParser parsed = new MyJSONParser();
-//    try {
-//      JSON j = parsed.parse(s).getObject("name");
-//      ArrayList<String> a = new ArrayList<String>();
-//      j.getStrings(a);
-//      for(String ss: a){
-//        System.out.println(ss);
-//      }
-//    } catch (IOException e) {
-//      e.printStackTrace();
-//    }
-//
-//
+    System.out.println("All test must pass, unless they're meant to invoke an exception");
     final Tester tests = new Tester();
 
     tests.add("Empty Object", new Test() {
@@ -90,9 +72,9 @@ final class TestMain {
       @Override
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
-        final JSON obj = parser.parse("{ \"{name}\":\"sam doe\" }");
+        final JSON obj = parser.parse("{ \"{google}\":\"is mad lit.\" }");
 
-        Asserts.isEqual("sam doe", obj.getString("{name}"));
+        Asserts.isEqual("is mad lit.", obj.getString("{google}"));
       }
     });
 
@@ -179,6 +161,28 @@ final class TestMain {
       }
     });
 
+    tests.add("Valid Escape Characters", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        final JSON obj = parser.parse("{ \"u\\th\\n\":\"first\", \"u\\th\\n\" : \"second\"}");
+
+        Asserts.isEqual("second", obj.getString("u\\th\\n"));
+      }
+    });
+
+    tests.add("Empty Object Key", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        System.out.println("aaa");
+        final JSON obj = parser.parse("{ \"anothaa one\": {}} ");
+        final JSON empty = obj.getObject("anothaa one");
+
+//        Asserts.isNotNull();
+      }
+    });
+
 
 
 
@@ -212,7 +216,7 @@ final class TestMain {
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
         // ','  should not be there = throw error.
-        final JSON obj = parser.parse(",{ \"name\": \"sam doe\" }");
+        final JSON obj = parser.parse(",{ \"cant\": \"catch thiss\" }");
       }
     });
 
@@ -225,14 +229,58 @@ final class TestMain {
       }
     });
 
-    tests.add("(IOException) Incomplete Scheme", new Test() {
+    tests.add("(IOException) Incomplete Schema", new Test() {
       @Override
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
-        // ','  should not be there = throw error.
-        final JSON obj = parser.parse("{\"name\": \"sam doe\" ");
+        // '}'  missing = throw error.
+        final JSON obj = parser.parse("{\"uhhh\": \"uhhhhh\" ");
       }
     });
+
+    tests.add("(IOException) Illegal Escape Character", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        // '\g'  should not be there = throw error.
+        final JSON obj = parser.parse("{\"\\g\": \"uhhhhh\" ");
+      }
+    });
+
+    tests.add("(IOException) Incomplete Schema(2)", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        final JSON obj = parser.parse("{\"\" ");
+      }
+    });
+
+    tests.add("(IOException) Invalid Input", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        final JSON obj = parser.parse(" pleasedont : \"work\"");
+      }
+    });
+
+    tests.add("(IOException) Invalid Input", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        // '\g'  should not be there = throw error.
+        final JSON obj = parser.parse(" pleasedont : \"work\"");
+      }
+    });
+
+    tests.add("(IOException) Illegal Key", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        final JSON obj = parser.parse("{ \"anothaa one\": [}} ");
+      }
+    });
+
+
 
 
 
