@@ -25,7 +25,13 @@ final class MyJSONParser implements JSONParser {
     String key = "";
     MyJSON map = new MyJSON();
 
-    for(int i = 0, endStr = in.length(); i < endStr; ++i){
+    String beginning = clear(in,'"', 0);
+    if(beginning != null && beginning.charAt(0) != '{'){
+      throw new IOException("Illegal beginning of schema.");
+    }
+
+    int endStr = in.length();
+    for(int i = 0; i < endStr; ++i){
       char token = in.charAt(i);
       if(token == '"'){
         int end = in.indexOf(token, i + 1);
@@ -40,11 +46,16 @@ final class MyJSONParser implements JSONParser {
         }
         i = end;
       }
-      else if(token == '{' && !completed){
-        map.setObject(key, parse(in.substring(i + 1)));
-        passedColon = false;
-        completed = true;
-        i += ((MyJSON)map.getObject(key)).getLen();
+      else if(token == '{'){
+        if(!completed){
+          map.setObject(key, parse(in.substring(i)));
+          passedColon = false;
+          completed = true;
+          i += ((MyJSON)map.getObject(key)).getLen();
+        }
+        if(i != 0 && key.equals("") && !passedColon){
+          throw new IOException("Missing Key.");
+        }
       } // there has to be a better way to take care of exceptions :(
       else if(token == '}' && completed && !passedColon){
         if(in.charAt(i - 1) == ' ' || in.charAt(i - 1) == '"'
@@ -63,7 +74,7 @@ final class MyJSONParser implements JSONParser {
             }
           }
 
-          map.setLen(++i);
+          map.setLen(i);
           return map;
         }
         else{
@@ -89,13 +100,14 @@ final class MyJSONParser implements JSONParser {
         throw new IOException("Invalid character after given key.");
       }
     }
+    if(in.charAt(endStr - 1) != '}'){
+      throw new IOException("Incomplete schema.");
+    }
     return map;
   }
 
-  public boolean isValidTail(String s){
-    for(int i = 0, end = s.length(); i < end; ++i){
-      return true;
-    }
-    return false;
+  public String clear(String in, char c, int from){
+    if(in.indexOf(c, from) == -1) return null;
+    else return in.substring(from,in.indexOf(c)).replaceAll("\\s+","");
   }
 }

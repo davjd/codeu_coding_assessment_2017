@@ -65,7 +65,7 @@ final class TestMain {
       @Override
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
-        final JSON obj = parser.parse("{ \"name\":\"sam doe\" }");
+        final JSON obj = parser.parse("{ \"name\":\"sam doe\" } ");
 
         Asserts.isEqual("sam doe", obj.getString("name"));
      }
@@ -130,11 +130,66 @@ final class TestMain {
       }
     });
 
+    tests.add("Depths of Hell", new Test() { // lol
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        final JSON obj = parser.parse("{\"r\":{\"e\":{\"c\":{\"u\":{\"r\":{\"s\":{\"i\":{\"o\":{\"n\":{\"g\":{\"a\":{\"n\":{\"g\":\"functional programming <33333333333\"}}}}}}}}}}");
+        final JSON end = obj.getObject("r").getObject("e").getObject("c").getObject("u").getObject("r").getObject("s").getObject("i").getObject("o").getObject("n").getObject("g").getObject("a").getObject("n");
+        Asserts.isEqual("functional programming <33333333333", end.getString("g"));
+      }
+    });
+
+
+    tests.add("String Object Mixed", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        final JSON obj = parser.parse("{ \"kid,\":\"cudi}\", \"hob-bies\" : { \"da'y\" : \"something\", \"night\" : \"else\"}, \"uh\" : \"nuh\"}");
+
+        final JSON hobbies = obj.getObject("hob-bies");
+
+        Asserts.isEqual("cudi}", obj.getString("kid,"));
+        Asserts.isEqual("something", hobbies.getString("da'y"));
+        Asserts.isEqual("else", hobbies.getString("night"));
+        Asserts.isEqual("nuh", obj.getString("uh"));
+      }
+    });
+
+
+    tests.add("No Whitespace", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        final JSON obj = parser.parse("{\"uh\":{\"uh\":\"uh\",\"yuh\":\"yuh\"}}");
+        final JSON inner = obj.getObject("uh");
+
+        Asserts.isEqual("uh", inner.getString("uh"));
+        Asserts.isEqual("yuh", inner.getString("yuh"));
+      }
+    });
+
+    tests.add("Unique Keys", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        final JSON obj = parser.parse("{ \"uh\":\"first\", \"uh\" : \"second\"}");
+
+        Asserts.isEqual("second", obj.getString("uh"));
+      }
+    });
+
+
+
+
+
     /*
     * Testing for invalid JSON-Lite schemas.
+    * All of the following tests SHOULD fail,
+    * because of exceptions thrown.
     * */
 
-    tests.add("Illegal character after given value (IOException)", new Test() {
+    tests.add("(IOException) Illegal character after given value", new Test() {
       @Override
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
@@ -143,7 +198,7 @@ final class TestMain {
       }
     });
 
-    tests.add("Illegal character after given key (IOException)", new Test() {
+    tests.add("(IOException) Illegal character after given key", new Test() {
       @Override
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
@@ -151,6 +206,35 @@ final class TestMain {
         final JSON obj = parser.parse("{ \"name\": }\"sam doe\" }");
       }
     });
+
+    tests.add("(IOException) Illegal Beginning of Schema", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        // ','  should not be there = throw error.
+        final JSON obj = parser.parse(",{ \"name\": \"sam doe\" }");
+      }
+    });
+
+    tests.add("(IOException) Missing Key", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        // '{'  should not be there = throw error.
+        final JSON obj = parser.parse("{{ \"name\": \"sam doe\" } ");
+      }
+    });
+
+    tests.add("(IOException) Incomplete Scheme", new Test() {
+      @Override
+      public void run(JSONFactory factory) throws Exception {
+        final JSONParser parser = factory.parser();
+        // ','  should not be there = throw error.
+        final JSON obj = parser.parse("{\"name\": \"sam doe\" ");
+      }
+    });
+
+
 
     tests.run(new JSONFactory(){
       @Override
