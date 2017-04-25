@@ -22,7 +22,7 @@ import java.util.HashSet;
 final class TestMain {
 
   public static void main(String[] args) {
-    System.out.println("All test must pass, unless they're meant to invoke an exception");
+    System.out.println("ALL TEST MUST PASS, UNLESS AN EXCEPTION WAS MEANT TO BE INVOKED.");
     final Tester tests = new Tester();
 
     tests.add("Empty Object", new Test() {
@@ -175,17 +175,12 @@ final class TestMain {
       @Override
       public void run(JSONFactory factory) throws Exception {
         final JSONParser parser = factory.parser();
-        System.out.println("aaa");
         final JSON obj = parser.parse("{ \"anothaa one\": {}} ");
         final JSON empty = obj.getObject("anothaa one");
 
-//        Asserts.isNotNull();
+        Asserts.isNotNull(empty);
       }
     });
-
-
-
-
 
     /*
     * Testing for invalid JSON-Lite schemas.
@@ -263,15 +258,6 @@ final class TestMain {
       }
     });
 
-    tests.add("(IOException) Invalid Input", new Test() {
-      @Override
-      public void run(JSONFactory factory) throws Exception {
-        final JSONParser parser = factory.parser();
-        // '\g'  should not be there = throw error.
-        final JSON obj = parser.parse(" pleasedont : \"work\"");
-      }
-    });
-
     tests.add("(IOException) Illegal Key", new Test() {
       @Override
       public void run(JSONFactory factory) throws Exception {
@@ -279,10 +265,6 @@ final class TestMain {
         final JSON obj = parser.parse("{ \"anothaa one\": [}} ");
       }
     });
-
-
-
-
 
     tests.run(new JSONFactory(){
       @Override

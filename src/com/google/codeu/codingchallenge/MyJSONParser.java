@@ -65,8 +65,8 @@ final class MyJSONParser implements JSONParser {
         }
       } // there has to be a better way to take care of exceptions :(
       else if(token == '}' && completed && !passedColon){
-        if(in.charAt(i - 1) == ' ' || in.charAt(i - 1) == '"'
-                || (in.charAt(i - 1) == '}' && ((MyJSON)map).getObjCtr() != 0 )){
+        if(in.charAt(i - 1) == ' ' || in.charAt(i - 1) == '"' || in.charAt(i - 1) == '{'
+                || (in.charAt(i - 1) == '}' && map.getObjCtr() != 0 )){
 
           if(in.indexOf('"', i) > 0){
             String tail = in.substring(i + 1, in.indexOf('"', i)).trim();
@@ -80,7 +80,6 @@ final class MyJSONParser implements JSONParser {
               throw new IOException("Invalid ending of JSON-Lite object.");
             }
           }
-
           map.setLen(i);
           return map;
         }
@@ -92,18 +91,14 @@ final class MyJSONParser implements JSONParser {
         if(passedColon){
           throw new IOException("Duplicate colon before given value.");
         }
-        else{
-          passedColon = true;
-        }
+        else passedColon = true;
       }
       else if(completed){
-        if(passedColon){
-          if(token != ',' && token != ' ' && token != '}'){
-            throw new IOException("Invalid character after given key.");
-          }
+        if(passedColon && token != ',' && token != ' ' && token != '}'){
+          throw new IOException("Invalid character after given key.");
         }
       }
-      else if(token != ' ' && (token != '{' && !completed)){
+      else if(token != ' '){
         throw new IOException("Invalid character after given key.");
       }
     }
@@ -113,19 +108,18 @@ final class MyJSONParser implements JSONParser {
     return map;
   }
 
-  public String clear(String in, char c, int from){
+  private String clear(String in, char c, int from){
     if(in.indexOf(c, from) == -1) return null;
     else return in.substring(from,in.indexOf(c)).replaceAll("\\s+","");
   }
 
-  public boolean validEscapes(String s){
+  private boolean validEscapes(String s){
     for(int i = 0, end = s.length() - 1; i < end; ++i){
       if(s.charAt(i) == '\\' && s.charAt(i + 1) != 't'
               && s.charAt(i + 1) != 'n'){
         return false;
       }
     }
-
     return true;
   }
 }
